@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cache {
     String name() default "";
+
     SavePolicy savePolicy() default SavePolicy.NOT_NULL;
 
     enum SavePolicy {
