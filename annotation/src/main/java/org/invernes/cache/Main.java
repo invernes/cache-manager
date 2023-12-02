@@ -1,7 +1,5 @@
 package org.invernes.cache;
 
-import org.invernes.cache.annotation.Cache;
-import org.invernes.cache.annotation.EnableCache;
 import org.invernes.cache.annotation.Test;
 import org.invernes.cache.annotation.TestImpl;
 import org.invernes.cache.annotation.processor.EnableCacheAnnotationProcessor;
@@ -19,9 +17,10 @@ public class Main {
         cacheManager.keySet().forEach(System.out::println);
 
         var proxy = context.getBean(Test.class);
-        System.out.println(proxy.testMethod("sdfsdf"));
+        System.out.println(proxy.testMethod("test1"));
+        System.out.println(proxy.testStringMethode("test2"));
 
-        System.out.println(proxy.testMethod("asdads"));
+        cacheManager.keySet().forEach(System.out::println);
 
     }
 }
@@ -32,11 +31,6 @@ class Config {
     @Bean
     public TestImpl test() {
         return new TestImpl();
-    }
-
-    @Bean
-    public CacheManager cacheManager() {
-        return new CacheManager();
     }
 
     @Bean
