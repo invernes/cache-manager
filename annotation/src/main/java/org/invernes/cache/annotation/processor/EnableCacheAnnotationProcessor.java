@@ -24,6 +24,7 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
     private static final String PROXIED_BEAN_SUFFIX = "Proxied";
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     public void postProcessBeanFactory(@NonNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
         var beans = beanFactory.getBeansOfType(CacheManager.class);
@@ -36,11 +37,6 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
         Map<String, Object> enableCacheAnnotatedBeans = beanFactory.getBeansWithAnnotation(EnableCache.class);
         for (String beanName : enableCacheAnnotatedBeans.keySet()) {
             Class<?> beanClass = beanFactory.getType(beanName);
-            if (beanClass == null) {
-                log.warn("Bean type for beanName = [{}] is null", beanName);
-                return;
-            }
-
             var bean = enableCacheAnnotatedBeans.get(beanName);
             Class<?>[] beanInterfaces = beanClass.getInterfaces();
             ClassLoader beanClassLoader = beanFactory.getBeanClassLoader();
@@ -63,7 +59,7 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
     }
 
     private BeanDefinition createBeanDefinitionForType(Class<?> beanClass, Supplier<?> beanInstanceSupplier) {
-        log.debug("Creating beanDefinition for type {}", beanClass);
+        log.debug("Creating beanDefinition for type [{}]", beanClass.getName());
         RootBeanDefinition beanDefinition = new RootBeanDefinition();
         beanDefinition.setBeanClass(beanClass);
         beanDefinition.setInstanceSupplier(beanInstanceSupplier);
@@ -97,7 +93,7 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
     private void removeBeanAndCreateCopyWithDifferentName(BeanDefinitionRegistry registry,
                                                           String beanName,
                                                           String newBeanName) {
-        log.debug("Recreating beanDefinition for name {} with new name  {}", beanName, newBeanName);
+        log.debug("Recreating beanDefinition for name [{}] with new name [{}]", beanName, newBeanName);
         registry.registerBeanDefinition(newBeanName, registry.getBeanDefinition(beanName));
         registry.removeBeanDefinition(beanName);
     }
