@@ -12,6 +12,8 @@
         <module>annotation</module>
         <module>manager</module>
         <module>common</module>
+        <module>cache-manager-spring-boot-starter</module>
+        <module>cache-manager-autoconfigure</module>
     </modules>
 
     <parent>
