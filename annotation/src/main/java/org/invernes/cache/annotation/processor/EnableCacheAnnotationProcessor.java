@@ -26,6 +26,12 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
     @Override
     @SuppressWarnings("ConstantConditions")
     public void postProcessBeanFactory(@NonNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        Map<String, Object> enableCacheAnnotatedBeans = beanFactory.getBeansWithAnnotation(EnableCache.class);
+        if (enableCacheAnnotatedBeans.values().isEmpty()) {
+            log.info("No beans with @EnableCache annotation found");
+            return;
+        }
+
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
         var beans = beanFactory.getBeansOfType(CacheManager.class);
         if (beans.values().isEmpty()) {
@@ -34,7 +40,6 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
         }
         CacheManager cacheManager = beanFactory.getBean(CacheManager.class);
 
-        Map<String, Object> enableCacheAnnotatedBeans = beanFactory.getBeansWithAnnotation(EnableCache.class);
         for (String beanName : enableCacheAnnotatedBeans.keySet()) {
             Class<?> beanClass = beanFactory.getType(beanName);
             var bean = enableCacheAnnotatedBeans.get(beanName);

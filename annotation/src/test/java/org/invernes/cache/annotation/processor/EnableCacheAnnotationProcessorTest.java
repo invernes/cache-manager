@@ -34,6 +34,27 @@ class EnableCacheAnnotationProcessorTest {
     private ConfigurableListableBeanFactory beanFactory;
 
     @Test
+    @DisplayName("Нет бинов с аннотацией EnableCache")
+    void noEnableCacheBeans() {
+        ((BeanDefinitionRegistry) beanFactory).removeBeanDefinition(BEAN_NAME);
+        ((BeanDefinitionRegistry) beanFactory).removeBeanDefinition(DUPLICATE_CACHES_BEAN_NAME);
+        ((BeanDefinitionRegistry) beanFactory).removeBeanDefinition(CACHE_MANAGER_BEAN_NAME);
+
+        var logger = TestHelper.getLogger(EnableCacheAnnotationProcessor.class, Level.INFO);
+
+        logger.start();
+        sut.postProcessBeanFactory(beanFactory);
+        logger.stop();
+
+        String expectedInfoMessage = "No beans with @EnableCache annotation found";
+
+        assertEquals(1, logger.list.size());
+
+        assertEquals(Level.INFO, logger.list.get(0).getLevel());
+        assertEquals(expectedInfoMessage, logger.list.get(0).getFormattedMessage());
+    }
+
+    @Test
     @DisplayName("В контексте нет бина типа CacheManager, проксируемый объект содержит кеши с одинаковыми именами ")
     void noCacheManager_duplicateCacheNames() {
         ((BeanDefinitionRegistry) beanFactory).removeBeanDefinition(BEAN_NAME);
