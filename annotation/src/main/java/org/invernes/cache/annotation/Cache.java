@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cache {
-    String name() default "";
+    String name();
 
     SavePolicy savePolicy() default SavePolicy.NOT_NULL;
 

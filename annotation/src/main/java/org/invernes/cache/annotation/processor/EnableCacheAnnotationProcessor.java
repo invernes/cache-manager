@@ -56,7 +56,7 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
             Supplier<?> beanInstanceSupplier = () -> Proxy.newProxyInstance(
                     beanClassLoader,
                     beanInterfaces,
-                    new EnableCacheProxyHandler(cacheManager, annotationMap, beanFactory, proxiedBeanName)
+                    new EnableCacheProxyHandler(cacheManager, annotationMap, bean)
             );
             BeanDefinition proxyBeanDefinition = createBeanDefinitionForType(beanClass, beanInstanceSupplier);
             registry.registerBeanDefinition(beanName, proxyBeanDefinition);
