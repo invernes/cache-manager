@@ -14,6 +14,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
@@ -22,6 +23,8 @@ import java.util.function.Supplier;
 @Slf4j
 public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor {
     private static final String PROXIED_BEAN_SUFFIX = "Proxied";
+    private static final String FAILED_TO_CREATE_CACHE_MANAGER_INSTANCE =
+            "Failed to create cache manager instance";
 
     @Override
     @SuppressWarnings("ConstantConditions")
@@ -33,14 +36,24 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
         }
 
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-        var beans = beanFactory.getBeansOfType(CacheManager.class);
-        if (beans.values().isEmpty()) {
-            BeanDefinition cacheManagerBeanDefinition = createBeanDefinitionForType(CacheManager.class, CacheManager::new);
-            registry.registerBeanDefinition("cacheManager", cacheManagerBeanDefinition);
-        }
-        CacheManager cacheManager = beanFactory.getBean(CacheManager.class);
+        var cacheManagerBeans = beanFactory.getBeansOfType(CacheManager.class);
 
         for (String beanName : enableCacheAnnotatedBeans.keySet()) {
+            EnableCache enableCacheAnnotation = beanFactory.findAnnotationOnBean(beanName, EnableCache.class);
+            Class<?> cacheManagerClass = enableCacheAnnotation.cacheManagerClass();
+            if (cacheManagerBeans.values().isEmpty() && enableCacheAnnotation != null) {
+                BeanDefinition cacheManagerBeanDefinition;
+                cacheManagerBeanDefinition = createBeanDefinitionForType(cacheManagerClass, () -> {
+                    try {
+                        return cacheManagerClass.getDeclaredConstructor().newInstance();
+                    } catch (Exception e) {
+                        throw new CacheManagerException(FAILED_TO_CREATE_CACHE_MANAGER_INSTANCE, e);
+                    }
+                });
+                registry.registerBeanDefinition("cacheManager", cacheManagerBeanDefinition);
+            }
+            CacheManager cacheManager = (CacheManager) beanFactory.getBean(cacheManagerClass);
+
             Class<?> beanClass = beanFactory.getType(beanName);
             var bean = enableCacheAnnotatedBeans.get(beanName);
             Class<?>[] beanInterfaces = beanClass.getInterfaces();
