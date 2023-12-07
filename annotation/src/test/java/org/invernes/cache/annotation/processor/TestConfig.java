@@ -1,10 +1,10 @@
 package org.invernes.cache.annotation.processor;
 
 import org.invernes.cache.annotation.Cache;
+import org.invernes.cache.annotation.EnableCache;
 import org.invernes.cache.manager.CacheManager;
 import org.invernes.cache.manager.SimpleCacheManager;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.invernes.cache.annotation.EnableCache;
 import org.springframework.context.annotation.Bean;
 
 import java.util.HashMap;
@@ -32,6 +32,13 @@ public class TestConfig {
     @Bean
     public TestEnableCacheAnnotatedClassWithInvalidCacheManager testEnableCacheAnnotatedClassWithInvalidCacheManager() {
         return new TestEnableCacheAnnotatedClassWithInvalidCacheManager();
+    }
+
+    public interface TestEnableCacheAnnotatedInterface {
+
+        Object testMethod1(Object o);
+
+        Object testMethod2(Object o);
     }
 
     @EnableCache
@@ -85,18 +92,12 @@ public class TestConfig {
 
     }
 
-    public interface TestEnableCacheAnnotatedInterface {
-
-        Object testMethod1(Object o);
-
-        Object testMethod2(Object o);
-    }
-
     public static class FailCacheManager implements CacheManager {
 
-        public FailCacheManager(String a) {} // no no args constructor
-
         private final Map<String, Object> objectMap = new HashMap<>();
+
+        public FailCacheManager(String a) {
+        } // no no args constructor
 
         public Object get(String key) {
             return objectMap.getOrDefault(key, null);
