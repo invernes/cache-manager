@@ -14,7 +14,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
@@ -63,7 +62,7 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
 
             // copy beanDefinition and create copy with different name
             String proxiedBeanName = beanName + PROXIED_BEAN_SUFFIX;
-            removeBeanAndCreateCopyWithDifferentName(registry, beanName, proxiedBeanName);
+            removeBeanDefinitionAndCreateCopyWithDifferentName(registry, beanName, proxiedBeanName);
 
             // register proxy with original bean name
             Supplier<?> beanInstanceSupplier = () -> Proxy.newProxyInstance(
@@ -108,9 +107,9 @@ public class EnableCacheAnnotationProcessor implements BeanFactoryPostProcessor 
         }
     }
 
-    private void removeBeanAndCreateCopyWithDifferentName(BeanDefinitionRegistry registry,
-                                                          String beanName,
-                                                          String newBeanName) {
+    private void removeBeanDefinitionAndCreateCopyWithDifferentName(BeanDefinitionRegistry registry,
+                                                                    String beanName,
+                                                                    String newBeanName) {
         log.debug("Recreating beanDefinition for name [{}] with new name [{}]", beanName, newBeanName);
         registry.registerBeanDefinition(newBeanName, registry.getBeanDefinition(beanName));
         registry.removeBeanDefinition(beanName);
